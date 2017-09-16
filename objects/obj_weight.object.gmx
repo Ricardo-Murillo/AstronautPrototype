@@ -32,8 +32,14 @@ parent = noone;
 mobile_state = false;
 old_x = x;
 old_y = y;
+
 vel_x = 0;
 vel_y = 0;
+old_vel_x = 0;
+old_vel_y = 0;
+
+acc_x = 0;
+acc_y = 0;
 
 mass = 19;
 dt = 0.15;
@@ -68,8 +74,15 @@ collisionblock = obj_block;
 
 vel_x = (x- old_x)/dt;
 vel_y = (y - old_y)/dt;
+
+acc_x = (vel_x - old_vel_x)/dt;
+acc_y = (vel_y - old_vel_y)/dt;
+
 old_x = x;
 old_y = y;
+old_vel_x = vel_x;
+old_vel_y = vel_y;
+
 </string>
           </argument>
         </arguments>
@@ -141,6 +154,31 @@ y += vel_y * dt;
 ///move to rope position
 //x = parent.last_x;
 //y = parent.last_y;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="8" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>draw_self();
+//if drawguides {}
+draw_forces(self);
 </string>
           </argument>
         </arguments>

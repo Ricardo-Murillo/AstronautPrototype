@@ -9,6 +9,7 @@
     <sprite>sprites\spr_player</sprite>
     <sprite>sprites\spr_link</sprite>
     <sprite>sprites\spr_block</sprite>
+    <sprite>sprites\spr_space</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -28,6 +29,8 @@
     <script>scripts\array.gml</script>
     <script>scripts\build_friction_list.gml</script>
     <script>scripts\script12.gml</script>
+    <script>scripts\draw_forces.gml</script>
+    <script>scripts\script14.gml</script>
   </scripts>
   <shaders name="shaders">
     <shader type="GLSLES">shaders\shd_test.shader</shader>

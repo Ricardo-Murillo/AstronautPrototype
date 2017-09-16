@@ -66,6 +66,9 @@
           <argument>
             <kind>1</kind>
             <string>///stop screen draw
+//shader_sample = shader_get_sampler_index(shd_test,"s_NoiseSampler");
+//texture_set_interpolation_ext(shader_sample, false);
+texture_set_interpolation(false);
 application_surface_draw_enable(false);
 </string>
           </argument>
