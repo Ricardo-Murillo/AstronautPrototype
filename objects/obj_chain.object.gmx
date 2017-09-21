@@ -40,7 +40,7 @@ length = 300;
 segments = 20;
 grav = 8;
 dt = 0.15;
-anchor = anchor_points.neither;
+anchor = anchor_points.start;
 start = noone
 last = noone;
 
@@ -103,8 +103,8 @@ last_vy = 0;
 //start_vy = (start_y - start_oldy)/dt;
 //start_oldx = start_x;
 //start_oldy = start_y;
-start_x = start.x;
-start_y = start.y;
+//start_x = start.x;
+//start_y = start.y;
 
 p1_vx = (p1_x - p1_oldx)/dt;
 p1_vy = (p1_y - p1_oldy)/dt;
@@ -116,17 +116,22 @@ p2_vy = (p2_y - p2_oldy)/dt;
 p2_oldx = p2_x;
 p2_oldy = p2_y;
 
-//last object now does the calculations, please use last.old_x and last.vel_x 
-//last_vx = (last_x - last_oldx)/dt;
-//last_vy = (last_y - last_oldy)/dt;
-//last_oldx = last_x;
-//last_oldy = last_y;
-last_x = last.x;
-last_y = last.y;
 
-start_vy += grav *dt;
-start_x = start.x;
-start_y = start.y;
+if(!object_exists(start)){
+    start_vy += grav *dt;
+}
+//start_x = start.x;
+//start_y = start.y;
+
+if(!object_exists(last)){
+    //last object now does the calculations, please use last.old_x and last.vel_x 
+    last_vx = (last_x - last_oldx)/dt;
+    last_vy = (last_y - last_oldy)/dt;
+    last_oldx = last_x;
+    last_oldy = last_y;
+}
+//last_x = last.x;
+//last_y = last.y;
 
 </string>
           </argument>
@@ -168,10 +173,12 @@ p2_vy += grav *dt;
 p2_x += p2_vx * dt;  
 p2_y += p2_vy * dt;  
 
-//last_vy += grav *dt;
-//last_x += last_vx * dt;  
-//last_y += last_vy * dt;  
-
+if(!object_exists(last)){
+    last_vy += grav *dt;
+    last_vx *= 0.99;
+    last_x += last_vx * dt;  
+    last_y += last_vy * dt;  
+}
 
 
 </string>
@@ -201,16 +208,34 @@ p2_y += p2_vy * dt;
 // author: Ricardo Murillo
 
 if(instance_exists(start)){
-    start_x = start.x;
+    start_x = start.x ;
     start_y = start.y;
+    //clear tension
+    ds_map_delete(start.forces, "tension");
 }
 if(instance_exists(last)){
     last_x = last.x;
     last_y = last.y;
+    //clear tension
+    ds_map_delete(last.forces, "tension");
 }
-//determine if the chain's length is outside of the chain's bounds
 var dist = point_distance(start_x,start_y,last_x,last_y);
+var at_edge = false;
+//determine if the chain's length is outside of the chain's bounds
 if(dist&gt;length){
+    at_edge = true;
+    //forces
+    if(instance_exists(start)&amp;&amp;(instance_exists(last))){
+        //get all forces
+        var netforce_start = calculate_forces(start)
+        var netforce_last = calculate_forces(last)
+        if (vector_sum(netforce_start)!=0 &amp;&amp; vector_sum(netforce_last)!=0){
+            //find forces that are &gt;90 deg from tension direction
+            //project them to tension direction and add together
+            //show_debug_message("non-zero");
+            
+        }
+     }
     //calculate length correction
     var correction_x = (length/dist - 1.0) * ( last_x - start_x );
     var correction_y = (length/dist - 1.0) * ( last_y - start_y );
@@ -224,12 +249,22 @@ if(dist&gt;length){
     //anchors_points are which which end of the rope is immobile
     if anchor == anchor_points.start {
         //determine how much of a given distance an object is capable of traveling
-        lx_slack = min(1.0,check_anchor_slack(last,0,0,correction_x,'x')); 
-        ly_slack = min(1.0,check_anchor_slack(last,lx_slack,0,correction_y,'y'));
-        
+        //lx_slack = min(1.0,check_anchor_slack(last,0,0,correction_x,'x')); 
+        //ly_slack = min(1.0,check_anchor_slack(last,lx_slack,0,correction_y,'y'));
+        lx_slack = check_anchor_slack(last,0,0,correction_x,'x'); 
+        ly_slack = check_anchor_slack(last,lx_slack,0,correction_y,'y');
+        //lx_slack = correction_x;
+        //ly_slack = correction_y;
         // distance the object can travel / distance the object needs to travel
         if (correction_x != 0) lx_weight = lx_slack/correction_x;
         if (correction_y != 0) ly_weight = ly_slack/correction_y;
+        
+        if(instance_exists(start)){
+            
+        }
+        if(instance_exists(last)){
+            
+        }
     } else if anchor == anchor_points.last {
         sx_slack = min(1.0,check_anchor_slack(start,0,0,-correction_x,'x')); 
         sy_slack = min(1.0,check_anchor_slack(start,sx_slack,0,-correction_y,'y'));
@@ -260,7 +295,8 @@ if(dist&gt;length){
         
         //objects with smaller masses get pulled more by more massive objects
         var weight_x = 0.5;
-        var weight_y = 0.5;
+        var weight_y = 0.5;/*
+        //find and apply friction
         if (instance_exists(start) &amp;&amp; instance_exists(last)){
             //var totalmass = start.mass + last.mass;
             //default_weight = (totalmass - start.mass)/totalmass;
@@ -273,7 +309,8 @@ if(dist&gt;length){
                 weight_x = f_netx_start/(f_netx_start + f_netx_last);
             if ((f_nety_start + f_nety_last) != 0)
                 weight_y = f_nety_start/(f_nety_start + f_nety_last);
-        }
+        }*/
+        //compensate if one object can't move their full distance
         if ((sxw &gt;= weight_x) &amp;&amp; (lxw &gt;= 1.0 - weight_x)){
             sx_weight = weight_x; 
             lx_weight = 1.0 - weight_x; 
@@ -299,23 +336,31 @@ if(dist&gt;length){
             }
         }
     }
+    //apply the velocities to the right places
     if(instance_exists(start)){
         start.x -= sx_weight * correction_x;
         start.y -= sy_weight * correction_y;
+        start_x = start.x;
+        start_y = start.y;
+    }else{
+        start_x -= sx_weight * correction_x;
+        start_y -= sy_weight * correction_y;
     }
-    start_x -= sx_weight * correction_x;
-    start_y -= sy_weight * correction_y;
     if(instance_exists(last)){
         last.x += lx_weight * correction_x;
         last.y += ly_weight * correction_y;
+        last_x = last.x;
+        last_y = last.y;
+    }else{
+        last_x += lx_weight * correction_x;
+        last_y += ly_weight * correction_y;
     }
-    last_x += lx_weight * correction_x;
-    last_y += ly_weight * correction_y;
 }
 r = dist/length;
 pr = 1/3;
 //mr = power(length/(dist+0.01),3)*(1-2*pr)/2;
 mr = (1-2*pr)/3
+//mr = 1/3;
 dist = point_distance(p1_x,p1_y,p2_x,p2_y);
 if(dist &gt; (length*mr)){
     correction_x = ((length*mr)/dist - 1.0) * ( p2_x - p1_x );
@@ -339,6 +384,31 @@ if(dist &gt; pr*length){
     correction_y = ((length*pr)/dist - 1.0) * ( p2_y - last_y );
     p2_x += 1.0 * correction_x;
     p2_y += 1.0 * correction_y;
+}
+if(instance_exists(start)){
+    start.tension_angle = -point_direction(start.x,start.y,last_x,last_y)*pi/180;
+    
+}
+if(instance_exists(last)){
+    last.tension_angle = -point_direction(last.x,last.y,start_x,start_y)*pi/180;
+    if(at_edge){
+        if(anchor == anchor_points.start){
+            ds_map_delete(last.forces, "tension");
+            var vel_angle = -point_direction(0,0,last.vel_x,last.vel_y)*pi/180;
+            var ang = last.tension_angle+pi/2 - vel_angle;
+            var vel_dist = point_distance(0,0,last.vel_x,last.vel_y);
+            var vel_proj = vel_dist*cos(ang);
+            last.vel_x = vel_proj*cos(last.tension_angle+pi/2);
+            last.vel_y = vel_proj*sin(last.tension_angle+pi/2);
+            show_debug_message("(" + string(last.vel_x) +", " + string(last.vel_y) + ")");
+            var chain_angle = last.tension_angle - pi;
+            var tension = -last.mass * last.grav_acc * sin(chain_angle);
+            var tension_force = array(tension*cos(chain_angle),tension*sin(chain_angle));
+            var net_force = calculate_forces(last);
+            if(dot_product(net_force[0],net_force[1],cos(last.tension_angle),sin(last.tension_angle))&lt;0)
+                last.forces[? "tension"] =  tension_force;
+        }
+    }
 }
 
 </string>

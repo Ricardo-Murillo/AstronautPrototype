@@ -16,6 +16,7 @@
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
+    <script>scripts\calculate_velocity.gml</script>
     <script>scripts\get_left.gml</script>
     <script>scripts\get_right.gml</script>
     <script>scripts\get_bezier.gml</script>
@@ -31,21 +32,39 @@
     <script>scripts\script12.gml</script>
     <script>scripts\draw_forces.gml</script>
     <script>scripts\script14.gml</script>
+    <script>scripts\approach_wall_x.gml</script>
+    <script>scripts\approach_wall_y.gml</script>
+    <script>scripts\apply_approach_wall.gml</script>
+    <script>scripts\get_projected.gml</script>
+    <script>scripts\chain_tension.gml</script>
+    <script>scripts\calculate_forces.gml</script>
+    <script>scripts\vector_sum.gml</script>
+    <script>scripts\mult_vector.gml</script>
   </scripts>
   <shaders name="shaders">
     <shader type="GLSLES">shaders\shd_test.shader</shader>
+    <shader type="GLSLES">shaders\shd_curve.shader</shader>
   </shaders>
   <objects name="objects">
+    <objects name="wall_object">
+      <object>objects\obj_block</object>
+    </objects>
+    <object>objects\obj_chain</object>
     <object>objects\obj_starter</object>
-    <object>objects\player</object>
+    <objects name="physics_object">
+      <object>objects\obj_physics</object>
+      <object>objects\player</object>
+      <objects name="pickup_object">
+        <object>objects\obj_pickup</object>
+        <object>objects\obj_weight</object>
+      </objects>
+    </objects>
     <object>objects\obj_link</object>
     <object>objects\obj_rope</object>
-    <object>objects\obj_chain</object>
-    <object>objects\obj_weight</object>
-    <object>objects\obj_block</object>
   </objects>
   <rooms name="rooms">
-    <room>rooms\room0</room>
+    <room>rooms\room_physicstest</room>
+    <room>rooms\room_scrolltest</room>
   </rooms>
   <help>
     <rtf>help.rtf</rtf>

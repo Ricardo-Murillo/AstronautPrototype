@@ -5,7 +5,7 @@
   <visible>-1</visible>
   <depth>0</depth>
   <persistent>0</persistent>
-  <parentName>&lt;undefined&gt;</parentName>
+  <parentName>obj_physics</parentName>
   <maskName>&lt;undefined&gt;</maskName>
   <events>
     <event eventtype="0" enumb="0">
@@ -45,7 +45,7 @@ old_vel_y = 0;
 acc_x = 0;
 acc_y = 0;
  
-mass = 1;
+mass = 5;
 ot = delta_time;
 dt = 0.15;
 walkspeed = 3;
@@ -54,27 +54,159 @@ var jumpheight = 30;
 var jumpdistance = 20;
 jump = (2*jumpheight*maxspeed)/(jumpdistance/2);
 grav_acc = (2*jumpheight*power(maxspeed,2.0))/power(jumpheight,2);
-//var jumptime = 20;
-//grav = jumpheight/jumptime;
-//grav_acc = grav / power(dt,2);
+acc_y = grav_acc;
 grav = 64;
-//grav_acc = 2;
+forces = ds_map_create();
+ds_map_add(forces,"gravity",array(0,grav_acc));
+
 state = states.falling;
 
 collisionblock = obj_block;
 
 drawguides = true;
 mobile_state = false;
-chain = noone;
-chain = instance_create(x,y,obj_chain);
-chain.start = self;
-chain.anchor = anchor_points.neither;
-weight = instance_create(x,y,obj_weight);
-chain.last = weight;
+if(true){
+    weight = instance_create(x,y,obj_weight);
 
+    chain = noone;
+    chain = instance_create(x,y,obj_chain);
+    chain.start = self;
+    chain.anchor = anchor_points.start;
+    chain.last = weight;
+}
 image_speed = 0.2;
 image_xscale = 0.5;
 image_yscale = 0.5;
+tension_angle = 0;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="1" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///move player based on local velocities, input, and collisions 
+// author: Ricardo Murillo
+
+dt = delta_time/100000;
+//input
+var input_right = get_right();
+var input_left = get_left();
+var input_right_re = get_rightreleased();
+var input_left_re = get_leftreleased();
+var input_jump = keyboard_check_pressed(vk_space);
+
+//----------------------------state changes----------------//
+if (state != states.grounded){
+    if (place_meeting(x,y+1,collisionblock)){
+        state = states.grounded;
+    }/*else if instance_exists(chain){
+        if get_chain_length(chain)/chain.length &gt; 0.95 &amp;&amp; chain.last.y&lt;y{
+            state = states.swinging;
+        }
+    }*/
+}
+if (state == states.grounded || state == states.jumping) &amp;&amp; vel_y &gt; 0{
+    state = states.falling;
+}
+if (state == states.swinging){
+    if get_chain_length(chain)/chain.length &lt;= 0.95 {
+            state = states.falling;
+        }
+}    
+
+ds_map_delete(forces, "input");
+var acc = mult_vector(calculate_forces(self),1/mass);
+acc_x = acc[0];
+acc_y = acc[1];
+var input_acc = array(0,0);
+//----------------------------inputs----------------//
+var old_vx = vel_x;
+var old_vy = vel_y;
+if(state == states.grounded){
+    if(input_right_re || input_left_re){    
+        vel_x = 0;
+        image_speed = 0;
+    }
+    if (input_left &amp;&amp; !input_right){
+        vel_x = -walkspeed/dt;
+        image_speed = 0.2;
+        image_xscale = -0.5;
+    }
+    if (input_right &amp;&amp; !input_left){
+        vel_x = walkspeed/dt;
+        image_speed = 0.2;
+        image_xscale = 0.5;
+    }   
+    if(input_jump){
+        vel_y += -jump;
+        state = states.jumping;
+    }
+}else  if(state == states.jumping ||state == states.falling){
+    if (input_left &amp;&amp; !input_right){
+        if vel_x &gt; -((walkspeed)/dt)
+            vel_x += -0.5*abs(vel_y*dt);
+    }
+    if (input_right &amp;&amp; !input_left){
+        if vel_x &lt; ((walkspeed)/dt)
+            vel_x += 0.5*abs(vel_y*dt);
+    //else if vel_x &lt; walkspeed
+    //    vel_x += min(abs(vel_y/4),(walkspeed/dt)/2);
+    }
+    //if (!input_left &amp;&amp; !input_right){
+        //vel_x *= 0.9;
+    //}
+}
+input_acc[0] = (vel_x - old_vx)/dt;
+input_acc[1] = (vel_y - old_vy)/dt;
+
+vel_x += 0;
+vel_y += grav_acc * dt;
+if (vel_y &gt; grav)
+    vel_y = grav;
+    
+apply_approach_wall(self);
+acc_x = 0;
+acc_y = grav_acc;
+//gravity
+forces[? "gravity"] = mult_vector(array(0,grav_acc),mass);
+//input forces
+forces[? "input"] = mult_vector(input_acc,mass);
+//environmental forces
+//normal force
+//forces[? "normal"] = array(0,0);
+ds_map_delete(forces, "normal");
+var acc = mult_vector(calculate_forces(self),1/mass);
+acc_x = acc[0];
+acc_y = acc[1];
+var normal = array(0,0);
+if (place_meeting(x+sign(acc_x),y,collisionblock)){
+    //maybe change for moving blocks, so if velocity is less then expected, normal force is lower
+    //if (vel_x &lt; expected_vel_x) normal[0] = calc_vel_x-acc_x;
+    if (vel_x == 0) normal[0] = -acc_x;
+}
+if (place_meeting(x,y+sign(acc_y),collisionblock)){
+    //maybe change for moving blocks, so if velocity is less then expected, normal force is lower
+    if (vel_y == 0) normal[1] = -acc_y;
+}
+forces[? "normal"] = mult_vector(normal,mass);
+//forces[? "normal"] = array(0,-grav_acc);
+
 </string>
           </argument>
         </arguments>
@@ -99,18 +231,15 @@ image_yscale = 0.5;
             <kind>1</kind>
             <string>///recalculate velocity since chain might have moved it
 // author: Ricardo Murillo
-
-vel_x = (x- old_x)/dt;
-vel_y = (y - old_y)/dt;
-
-acc_x = (vel_x - old_vel_x)/dt;
-acc_y = (vel_y - old_vel_y)/dt;
-
-old_x = x;
-old_y = y;
-old_vel_x = vel_x;
-old_vel_y = vel_y;
-
+//H collision
+var dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
+if abs(dx)&lt; abs(vel_x*dt) vel_x = 0;
+x += dx;
+//V collision
+var dy = approach_wall_y(self,0,0,vel_y*dt,collisionblock)   
+if abs(dy)&lt; abs(vel_y*dt) vel_y = 0;
+y += dy;
+//calculate_velocity(self);
 </string>
           </argument>
         </arguments>
@@ -131,8 +260,8 @@ old_vel_y = vel_y;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>view_xview[0] = player.x - view_wview[0]/2;
-view_yview[0] = player.y - view_hview[0]/2;
+            <string>view_xview[0] = player.x - view_wview/2;
+view_yview[0] = player.y - view_hview/2;
 </string>
           </argument>
         </arguments>
@@ -158,28 +287,6 @@ view_yview[0] = player.y - view_hview[0]/2;
             <string>///move player based on local velocities, input, and collisions 
 // author: Ricardo Murillo
 
-/*move_x = mouse_x - self.x;
-move_y = mouse_y - self.y;
-
-if(mouse_check_button_pressed(mb_left)){
-    if (instance_position( mouse_x, mouse_y, self )){
-        mobile_state = true;
-    }
-}
-
-if(mouse_check_button_released(mb_left))
-    mobile_state = false;
-*/
-/*if (mobile_state){
-   //x += move_x;
-   vel_x = move_x/dt;
-   //y += move_y;
-   vel_y = move_y/dt;
-}else{
-   vel_x = 0;
-   //y += move_y;
-   vel_y = 0;
-}*/
 dt = delta_time/100000;
 //input
 var input_right = get_right();
@@ -188,7 +295,7 @@ var input_right_re = get_rightreleased();
 var input_left_re = get_leftreleased();
 var input_jump = keyboard_check_pressed(vk_space);
 
-//state changes
+//----------------------------state changes----------------//
 if (state != states.grounded){
     if (place_meeting(x,y+1,collisionblock)){
         state = states.grounded;
@@ -205,24 +312,37 @@ if (state == states.swinging){
     if get_chain_length(chain)/chain.length &lt;= 0.95 {
             state = states.falling;
         }
-}
+}    
 
-
+ds_map_delete(forces, "input");
+var acc = mult_vector(calculate_forces(self),1/mass);
+acc_x = acc[0];
+acc_y = acc[1];
+var input_acc = array(0,0);
+//----------------------------inputs----------------//
+var old_vx = vel_x;
+var old_vy = vel_y;
 if(state == states.grounded){
     if(input_right_re || input_left_re){    
-        vel_x = 0;
+        vel_x = sign(vel_x)*floor(abs(vel_x)*0.9);
         image_speed = 0;
     }
     if (input_left &amp;&amp; !input_right){
-        vel_x = -walkspeed/dt;
+        //vel_x = sign(vel_x)*floor(abs(vel_x)*0.9);
+        //vel_x = -walkspeed/dt;
+        if vel_x &gt; -((walkspeed)/dt)
+            vel_x -= 0.2*(walkspeed)/dt;
         image_speed = 0.2;
         image_xscale = -0.5;
     }
     if (input_right &amp;&amp; !input_left){
-        vel_x = walkspeed/dt;
+        //var vel_dif = walkspeed/dt - vel_x;
+        //vel_x += vel_dif*(0.5);
+        if vel_x &lt; ((walkspeed)/dt)
+            vel_x += 0.2*(walkspeed)/dt;
         image_speed = 0.2;
         image_xscale = 0.5;
-    }
+    }   
     if(input_jump){
         vel_y += -jump;
         state = states.jumping;
@@ -230,39 +350,81 @@ if(state == states.grounded){
 }else  if(state == states.jumping ||state == states.falling){
     if (input_left &amp;&amp; !input_right){
         if vel_x &gt; -((walkspeed)/dt)
-            vel_x += -0.2*(walkspeed/dt);
+            vel_x += -0.5*abs(vel_y*dt);
     }
     if (input_right &amp;&amp; !input_left){
         if vel_x &lt; ((walkspeed)/dt)
-            vel_x += 0.2*(walkspeed/dt);
+            vel_x += 0.5*abs(vel_y*dt);
     //else if vel_x &lt; walkspeed
     //    vel_x += min(abs(vel_y/4),(walkspeed/dt)/2);
     }
     //if (!input_left &amp;&amp; !input_right){
-        vel_x *= 0.9;
+        //vel_x *= 0.9;
     //}
 }
+input_acc[0] = (vel_x - old_vx)/dt;
+input_acc[1] = (vel_y - old_vy)/dt;
 
-if (vel_y &lt; grav)
-    vel_y += grav_acc *dt;    
+vel_x += 0;
+vel_y += grav_acc * dt;
+if (vel_y &gt; grav)
+    vel_y = grav;
     
-//H collision
-if (place_meeting(x+vel_x * dt,y,collisionblock)){
-    while(!place_meeting(x+sign(vel_x),y,collisionblock)){
-        x += sign(vel_x);
-    }
-    vel_x = 0;
-}    
-x += vel_x * dt;
-//V collision
-if (place_meeting(x,y+vel_y * dt,collisionblock)){ 
-    while(!place_meeting(x,y+sign(vel_y),collisionblock)){
-        y += sign(vel_y);
-    }
-    vel_y = 0;
-}    
-y += vel_y * dt;
-ot = delta_time;
+apply_approach_wall(self);
+acc_x = 0;
+acc_y = grav_acc;
+//gravity
+forces[? "gravity"] = mult_vector(array(0,grav_acc),mass);
+//input forces
+forces[? "input"] = mult_vector(input_acc,mass);
+//environmental forces
+//normal force
+//forces[? "normal"] = array(0,0);
+ds_map_delete(forces, "normalx");
+ds_map_delete(forces, "normaly");
+var acc = mult_vector(calculate_forces(self),1/mass);
+acc_x = acc[0];
+acc_y = acc[1];
+//var normal = array(0,0);
+if (place_meeting(x+sign(acc_x),y,collisionblock)){
+    //maybe change for moving blocks, so if velocity is less then expected, normal force is lower
+    //if (vel_x &lt; expected_vel_x) normal[0] = calc_vel_x-acc_x;
+    //if (vel_x == 0) normal[0] = -acc_x;
+    forces[? "normalx"] = array(-acc_x*mass,0);
+}
+if (place_meeting(x,y+sign(acc_y),collisionblock)){
+    //maybe change for moving blocks, so if velocity is less then expected, normal force is lower
+    //if (vel_y == 0) normal[1] = -acc_y;
+    forces[? "normaly"] = array(0,-acc_y*mass);
+}
+//forces[? "normal"] = mult_vector(normal,mass);
+//forces[? "normal"] = array(0,-grav_acc);
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="8" enumb="73">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>
+//if drawguides {}
+draw_forces(self);
 </string>
           </argument>
         </arguments>
@@ -286,8 +448,6 @@ ot = delta_time;
           <argument>
             <kind>1</kind>
             <string>draw_self();
-//if drawguides {}
-draw_forces(self);
 </string>
           </argument>
         </arguments>
