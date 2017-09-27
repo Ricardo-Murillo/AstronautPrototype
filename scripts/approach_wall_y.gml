@@ -6,6 +6,7 @@ var offsetx = argument1;
 var offsety = argument2;
 var distance = argument3;
 var wall = argument4;
+
 with object{
     var dx = offsetx + x;
     var dy = offsety + y;
@@ -19,4 +20,10 @@ with object{
     }else{
         return distance;
     }
+    /*var iter = 0;
+    while(!place_meeting(dx, dy+sign(distance),wall)){
+        iter += sign(distance);
+        dy += sign(distance);
+    }*/
+    return iter;
 }

@@ -44,7 +44,7 @@ acc_y = 0;
 mass = 19;
 dt = 0.15;
 grav = 64;
-grav_acc = 8;
+grav_acc = 16;
 acc_y = grav_acc;
 collisionblock = obj_block;
 

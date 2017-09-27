@@ -5,7 +5,7 @@
   <visible>-1</visible>
   <depth>0</depth>
   <persistent>0</persistent>
-  <parentName>obj_physics</parentName>
+  <parentName>obj_chainable</parentName>
   <maskName>&lt;undefined&gt;</maskName>
   <events>
     <event eventtype="0" enumb="0">
@@ -48,14 +48,19 @@ acc_y = 0;
 mass = 5;
 ot = delta_time;
 dt = 0.15;
-walkspeed = 3;
+walkspeed = 6;
 var maxspeed = walkspeed;
 var jumpheight = 30;
 var jumpdistance = 20;
-jump = (2*jumpheight*maxspeed)/(jumpdistance/2);
-grav_acc = (2*jumpheight*power(maxspeed,2.0))/power(jumpheight,2);
+//jump = (2*jumpheight*maxspeed)/(jumpdistance/2);
+//base_acc = (2*jumpheight*power(maxspeed,2.0))/power(jumpheight,2);
+jump = 40;
+base_acc = 2;
+damp_acc = 2*base_acc;
+grav_acc = base_acc;
 acc_y = grav_acc;
-grav = 64;
+jump_damp = 0.5;
+grav = 124;
 forces = ds_map_create();
 ds_map_add(forces,"gravity",array(0,grav_acc));
 
@@ -65,7 +70,7 @@ collisionblock = obj_block;
 
 drawguides = true;
 mobile_state = false;
-if(true){
+if(false){
     weight = instance_create(x,y,obj_weight);
 
     chain = noone;
@@ -232,6 +237,7 @@ forces[? "normal"] = mult_vector(normal,mass);
             <string>///recalculate velocity since chain might have moved it
 // author: Ricardo Murillo
 //H collision
+/*
 var dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
 if abs(dx)&lt; abs(vel_x*dt) vel_x = 0;
 x += dx;
@@ -239,6 +245,7 @@ x += dx;
 var dy = approach_wall_y(self,0,0,vel_y*dt,collisionblock)   
 if abs(dy)&lt; abs(vel_y*dt) vel_y = 0;
 y += dy;
+*/
 //calculate_velocity(self);
 </string>
           </argument>
@@ -293,12 +300,13 @@ var input_right = get_right();
 var input_left = get_left();
 var input_right_re = get_rightreleased();
 var input_left_re = get_leftreleased();
-var input_jump = keyboard_check_pressed(vk_space);
+var input_jump = get_jump();
+var input_jump_re = get_jumpreleased();
 
 //----------------------------state changes----------------//
 if (state != states.grounded){
     if (place_meeting(x,y+1,collisionblock)){
-        state = states.grounded;
+        state = states.grounded;//will not work on 1way blocks?
     }/*else if instance_exists(chain){
         if get_chain_length(chain)/chain.length &gt; 0.95 &amp;&amp; chain.last.y&lt;y{
             state = states.swinging;
@@ -347,7 +355,7 @@ if(state == states.grounded){
         vel_y += -jump;
         state = states.jumping;
     }
-}else  if(state == states.jumping ||state == states.falling){
+}else  if(state == states.jumping){
     if (input_left &amp;&amp; !input_right){
         if vel_x &gt; -((walkspeed)/dt)
             vel_x += -0.5*abs(vel_y*dt);
@@ -355,12 +363,23 @@ if(state == states.grounded){
     if (input_right &amp;&amp; !input_left){
         if vel_x &lt; ((walkspeed)/dt)
             vel_x += 0.5*abs(vel_y*dt);
-    //else if vel_x &lt; walkspeed
-    //    vel_x += min(abs(vel_y/4),(walkspeed/dt)/2);
     }
-    //if (!input_left &amp;&amp; !input_right){
-        //vel_x *= 0.9;
-    //}
+    if(input_jump_re){
+        grav_acc = damp_acc;
+        state = states.falling;
+    }
+}else  if(state == states.falling){
+    if (vel_y&gt;=0){
+        grav_acc = base_acc;
+    }
+    if (input_left &amp;&amp; !input_right){
+        if vel_x &gt; -((walkspeed)/dt)
+            vel_x += -0.5*abs(vel_y*dt);
+    }
+    if (input_right &amp;&amp; !input_left){
+        if vel_x &lt; ((walkspeed)/dt)
+            vel_x += 0.5*abs(vel_y*dt);
+    }
 }
 input_acc[0] = (vel_x - old_vx)/dt;
 input_acc[1] = (vel_y - old_vy)/dt;
@@ -370,7 +389,7 @@ vel_y += grav_acc * dt;
 if (vel_y &gt; grav)
     vel_y = grav;
     
-apply_approach_wall(self);
+/*
 acc_x = 0;
 acc_y = grav_acc;
 //gravity
@@ -399,7 +418,64 @@ if (place_meeting(x,y+sign(acc_y),collisionblock)){
 }
 //forces[? "normal"] = mult_vector(normal,mass);
 //forces[? "normal"] = array(0,-grav_acc);
+*/
 
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="3" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>//if !chained
+    //apply_approach_wall(self);
+with(obj_1way) {
+    if(round(other.y + (other.sprite_height/2)) &gt; y)// or if down button?
+    {
+        //show_debug_message("hello: "+string(self.id));
+        //sprite_index = spr_1way_temp;
+        sprite_index = -1;
+        mask_index = -1;
+        
+    }
+}
+var ramp_height = 10;
+var a = approach_wall_y(self,0,0,-ramp_height,collisionblock);
+y += a;
+//H collision
+var dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
+if abs(dx)&lt; abs(vel_x*dt) vel_x = 0;
+x += dx;
+a = approach_wall_y(self,0,0,ramp_height*2,collisionblock);
+y += a;
+if a==ramp_height*2{
+    a = approach_wall_y(self,0,0,-ramp_height,collisionblock);
+    y += a;
+}
+//V collision
+var dy = approach_wall_y(self,0,0,vel_y*dt,collisionblock);   
+if abs(dy)&lt; abs(vel_y*dt) vel_y = 0;
+y += dy;
+
+with(obj_1way) {
+    sprite_index = spr_1way;
+    mask_index = spr_1way;
+}
 </string>
           </argument>
         </arguments>

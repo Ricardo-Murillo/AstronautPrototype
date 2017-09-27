@@ -9,7 +9,10 @@
     <sprite>sprites\spr_player</sprite>
     <sprite>sprites\spr_link</sprite>
     <sprite>sprites\spr_block</sprite>
+    <sprite>sprites\spr_1way</sprite>
+    <sprite>sprites\spr_1way_temp</sprite>
     <sprite>sprites\spr_space</sprite>
+    <sprite>sprites\spr_curvedblock</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -19,6 +22,8 @@
     <script>scripts\calculate_velocity.gml</script>
     <script>scripts\get_left.gml</script>
     <script>scripts\get_right.gml</script>
+    <script>scripts\get_jump.gml</script>
+    <script>scripts\get_jumpreleased.gml</script>
     <script>scripts\get_bezier.gml</script>
     <script>scripts\check_anchor_slack.gml</script>
     <script>scripts\friction_modifier_x.gml</script>
@@ -48,15 +53,20 @@
   <objects name="objects">
     <objects name="wall_object">
       <object>objects\obj_block</object>
+      <object>objects\obj_1way</object>
+      <object>objects\obj_curvedblock</object>
     </objects>
     <object>objects\obj_chain</object>
     <object>objects\obj_starter</object>
     <objects name="physics_object">
       <object>objects\obj_physics</object>
-      <object>objects\player</object>
-      <objects name="pickup_object">
-        <object>objects\obj_pickup</object>
-        <object>objects\obj_weight</object>
+      <objects name="chainable_object">
+        <object>objects\obj_chainable</object>
+        <object>objects\player</object>
+        <objects name="pickup_object">
+          <object>objects\obj_pickup</object>
+          <object>objects\obj_weight</object>
+        </objects>
       </objects>
     </objects>
     <object>objects\obj_link</object>
