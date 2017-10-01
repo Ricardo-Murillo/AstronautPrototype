@@ -5,7 +5,7 @@
   <visible>-1</visible>
   <depth>0</depth>
   <persistent>0</persistent>
-  <parentName>obj_block</parentName>
+  <parentName>obj_1way</parentName>
   <maskName>&lt;undefined&gt;</maskName>
   <events>
     <event eventtype="0" enumb="0">
@@ -25,15 +25,32 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>collisionmask = mask_index;
-sprite_index = -1;
-//draw_sprite(spr_1way,0,x,y);
+            <string>
+old_x = x;
+old_y = y;
+
+vel_x = 0;
+vel_y = 0;
+acc_x = 0;
+acc_y = 0;
+
+mass = 5;//maybe density*area
+ot = delta_time;
+dt = 0.15;
+
+x_speed = 32;
+y_speed = 0;
+
+vel_x = x_speed;
+vel_y = y_speed;
+
+collisionblock = obj_block;
 </string>
           </argument>
         </arguments>
       </action>
     </event>
-    <event eventtype="8" enumb="0">
+    <event eventtype="3" enumb="0">
       <action>
         <libid>1</libid>
         <id>603</id>
@@ -50,10 +67,18 @@ sprite_index = -1;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//draw_rectangle(x-spr_1way.sprite_width/2,y,x+spr_1way.sprite_width/2,y+spr_1way.sprite_height,true);
-draw_sprite_ext(mask_index,0,x,y,1,1,0,c_aqua,0.5); 
-//draw_sprite(spr_1way,0,x,y);
-//draw_self();
+            <string>//H collision
+var dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
+if abs(dx)&lt; abs(vel_x*dt){
+    vel_x *= -1;
+}
+x += dx;
+//V collision
+var dy = approach_wall_y(self,0,0,vel_y*dt,collisionblock);   
+if abs(dy)&lt; abs(vel_y*dt){
+    vel_y *=-1;
+}
+y += dy;
 </string>
           </argument>
         </arguments>

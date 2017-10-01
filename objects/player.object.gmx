@@ -304,15 +304,15 @@ var input_jump = get_jump();
 var input_jump_re = get_jumpreleased();
 
 //----------------------------state changes----------------//
-if (state != states.grounded){
-    if (place_meeting(x,y+1,collisionblock)){
-        state = states.grounded;//will not work on 1way blocks?
+/*if (state != states.grounded){
+    if (place_meeting(x,y+1,collisionblock)){//this is broken pls change
+        state = states.grounded;
     }/*else if instance_exists(chain){
         if get_chain_length(chain)/chain.length &gt; 0.95 &amp;&amp; chain.last.y&lt;y{
             state = states.swinging;
         }
     }*/
-}
+//}
 if (state == states.grounded || state == states.jumping) &amp;&amp; vel_y &gt; 0{
     state = states.falling;
 }
@@ -449,31 +449,53 @@ with(obj_1way) {
     {
         //show_debug_message("hello: "+string(self.id));
         //sprite_index = spr_1way_temp;
-        sprite_index = -1;
+        //sprite_index = -1;
         mask_index = -1;
         
     }
 }
 var ramp_height = 10;
-var a = approach_wall_y(self,0,0,-ramp_height,collisionblock);
-y += a;
 //H collision
-var dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
-if abs(dx)&lt; abs(vel_x*dt) vel_x = 0;
-x += dx;
-a = approach_wall_y(self,0,0,ramp_height*2,collisionblock);
-y += a;
-if a==ramp_height*2{
+var dx;
+if (vel_y&gt;0){ //going down
+    var a = approach_wall_y(self,0,0,-ramp_height,collisionblock);
+    y += a;
+    dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
+    if abs(dx)&lt; abs(vel_x*dt) vel_x = 0;
+    x += dx;
+    var b = approach_wall_y(self,0,0,ramp_height-a,collisionblock);
+    y += b;
+    if b==ramp_height-a{
+       a = approach_wall_y(self,0,0,-ramp_height,collisionblock);
+       y += a;
+    }
+}else if (vel_y&lt;0){
+    var a = approach_wall_y(self,0,0,ramp_height,collisionblock);
+    y += a;
+    dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
+    if abs(dx)&lt; abs(vel_x*dt) vel_x = 0;
+    x += dx;
     a = approach_wall_y(self,0,0,-ramp_height,collisionblock);
     y += a;
 }
+else{
+    var dx = approach_wall_x(self,0,0,vel_x*dt,collisionblock)   
+    if abs(dx)&lt; abs(vel_x*dt){
+        vel_x = 0;
+    }
+    x += dx;
+}
 //V collision
+var old_vel_y = vel_y;
 var dy = approach_wall_y(self,0,0,vel_y*dt,collisionblock);   
-if abs(dy)&lt; abs(vel_y*dt) vel_y = 0;
+if abs(dy)&lt; abs(vel_y*dt){
+     vel_y = 0;
+     if (old_vel_y &gt;0)  state = states.grounded;
+}
 y += dy;
 
 with(obj_1way) {
-    sprite_index = spr_1way;
+    //sprite_index = spr_1way;
     mask_index = spr_1way;
 }
 </string>

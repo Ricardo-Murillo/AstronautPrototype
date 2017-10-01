@@ -54,19 +54,18 @@
     <objects name="wall_object">
       <object>objects\obj_block</object>
       <object>objects\obj_1way</object>
+      <object>objects\obj_moving</object>
       <object>objects\obj_curvedblock</object>
     </objects>
     <object>objects\obj_chain</object>
     <object>objects\obj_starter</object>
     <objects name="physics_object">
       <object>objects\obj_physics</object>
-      <objects name="chainable_object">
-        <object>objects\obj_chainable</object>
-        <object>objects\player</object>
-        <objects name="pickup_object">
-          <object>objects\obj_pickup</object>
-          <object>objects\obj_weight</object>
-        </objects>
+      <object>objects\obj_chainable</object>
+      <object>objects\player</object>
+      <objects name="pickup_object">
+        <object>objects\obj_pickup</object>
+        <object>objects\obj_weight</object>
       </objects>
     </objects>
     <object>objects\obj_link</object>
