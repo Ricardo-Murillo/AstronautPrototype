@@ -25,8 +25,9 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//sprite_index = -1;
-//draw_sprite(spr_1way,0,x,y);
+            <string>event_inherited();
+fric = 0.1;
+bounce = 0.0;
 </string>
           </argument>
         </arguments>

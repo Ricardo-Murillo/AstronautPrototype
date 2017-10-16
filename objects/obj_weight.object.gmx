@@ -27,31 +27,15 @@
             <kind>1</kind>
             <string>/// set default values for obj_weight's variables 
 // author: Ricardo Murillo
-
-parent = noone;
-mobile_state = false;
-old_x = x;
-old_y = y;
-
-vel_x = 0;
-vel_y = 0;
-old_vel_x = 0;
-old_vel_y = 0;
-
-acc_x = 0;
-acc_y = 0;
+event_inherited();
 
 mass = 19;
 dt = 0.15;
 grav = 64;
 grav_acc = 16;
 acc_y = grav_acc;
-collisionblock = obj_block;
 
-forces = ds_map_create();
-ds_map_add(forces,"gravity",array(0,grav_acc*mass));
-
-tension_angle = 0;
+forces[? "gravity"] = mult_vector(array(0,grav_acc),mass);
 </string>
           </argument>
         </arguments>
@@ -178,7 +162,11 @@ acc_y = grav_acc;
             <string>//if !chained
     //apply_approach_wall(self);
 with(obj_1way) {
-    if(round(other.y + (other.sprite_height/2)-1) &gt; y)// or if down button?
+    //var other_x = round(other.x + (other.sprite_width/2)-1);
+    var other_x = other.x;
+    var other_y = round(other.y + (other.sprite_height/2)-1);
+    //if( other_y &gt; y)// or if down button?
+    if(bool_1way(self,other,false))
     {
         //show_debug_message("hello: "+string(self.id));
         //sprite_index = spr_1way_temp;
@@ -186,10 +174,10 @@ with(obj_1way) {
         mask_index = -1;
     }
     else{
-        mask_index = spr_1way;
+        mask_index = self.collisionmask;
     }
 }
-var ramp_height = 10;
+var ramp_height = 5;
 var dx = vel_x*dt;
 var dy = vel_y*dt;
 /*var steps;
@@ -210,18 +198,29 @@ else{
 }*/
 var xk = x;
 var yk = y;
+var ramp_corr = approach_wall_y(self,0,0,-ramp_height,collisionblock);
+y += ramp_corr;
 repeat (ceil(abs(dx))) {
     var ix = sign(dx)*min(abs(dx),1);
-    if (place_meeting(x+ix, y, collisionblock)){
-        vel_x = 0;
+    //if (place_meeting(x+ix, y, collisionblock)){
+    var inst = instance_place(x+ix, y, collisionblock);
+    if inst != noone {
+        vel_x = -vel_x*inst.bounce;
+        vel_y -= vel_y * inst.fric;
         break;
     }
     x += ix;
     dx--;
-}repeat (ceil(abs(dy))) {
+}
+var ramp_corr = approach_wall_y(self,0,0,-ramp_corr,collisionblock);
+y += ramp_corr;
+repeat (ceil(abs(dy))) {
     var iy = sign(dy)*min(abs(dy),1);
-    if (place_meeting(x, y+iy, collisionblock)){
-        vel_y = 0;
+    //if (place_meeting(x, y+iy, collisionblock)){
+    var inst = instance_place(x, y+iy, collisionblock);
+    if inst != noone {
+        vel_x -= vel_x * inst.fric;
+        vel_y = -vel_y*inst.bounce;
         break;
     }
     y += iy;
@@ -290,7 +289,7 @@ y += dy;
 */
 with(obj_1way) {
     //sprite_index = spr_1way;
-    mask_index = spr_1way;
+    mask_index = self.collisionmask;
 }
 </string>
           </argument>

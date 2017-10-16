@@ -9,6 +9,10 @@
     <sprite>sprites\spr_player</sprite>
     <sprite>sprites\spr_link</sprite>
     <sprite>sprites\spr_block</sprite>
+    <sprite>sprites\spr_blockrough</sprite>
+    <sprite>sprites\spr_blockbounce</sprite>
+    <sprite>sprites\spr_ramp45</sprite>
+    <sprite>sprites\spr_ramp45_mask</sprite>
     <sprite>sprites\spr_1way</sprite>
     <sprite>sprites\spr_1way_temp</sprite>
     <sprite>sprites\spr_space</sprite>
@@ -45,6 +49,8 @@
     <script>scripts\calculate_forces.gml</script>
     <script>scripts\vector_sum.gml</script>
     <script>scripts\mult_vector.gml</script>
+    <script>scripts\bool_1way_point.gml</script>
+    <script>scripts\bool_1way.gml</script>
   </scripts>
   <shaders name="shaders">
     <shader type="GLSLES">shaders\shd_test.shader</shader>
@@ -53,9 +59,11 @@
   <objects name="objects">
     <objects name="wall_object">
       <object>objects\obj_block</object>
+      <object>objects\obj_blockbounce</object>
       <object>objects\obj_1way</object>
       <object>objects\obj_moving</object>
       <object>objects\obj_curvedblock</object>
+      <object>objects\obj_ramp45</object>
     </objects>
     <object>objects\obj_chain</object>
     <object>objects\obj_starter</object>
@@ -70,6 +78,7 @@
     </objects>
     <object>objects\obj_link</object>
     <object>objects\obj_rope</object>
+    <object>objects\obj_blockrough</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room_physicstest</room>

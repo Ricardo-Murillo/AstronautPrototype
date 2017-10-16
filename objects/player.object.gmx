@@ -27,24 +27,13 @@
             <kind>1</kind>
             <string>/// set default values for player object's variables 
 // author: Ricardo Murillo
-
+event_inherited();
 enum states{
     jumping,
     grounded,
     falling,
     swinging
 }
-old_x = x;
-old_y = y;
-
-vel_x = 0;
-vel_y = 0;
-old_vel_x = 0;
-old_vel_y = 0;
-
-acc_x = 0;
-acc_y = 0;
- 
 mass = 5;
 ot = delta_time;
 dt = 0.15;
@@ -62,12 +51,11 @@ acc_y = grav_acc;
 jump_damp = 0.5;
 grav = 124;
 forces = ds_map_create();
-ds_map_add(forces,"gravity",array(0,grav_acc));
+forces[? "gravity"] = mult_vector(array(0,grav_acc),mass);
 
 state = states.falling;
 
-collisionblock = obj_block;
-
+helditem = noone;
 drawguides = true;
 mobile_state = false;
 if(false){
@@ -546,6 +534,11 @@ draw_forces(self);
           <argument>
             <kind>1</kind>
             <string>draw_self();
+if object_exists(helditem){
+    draw_set_color(c_black);
+    if(object_get_sprite(obj)) draw_sprite(object_get_sprite(obj),-1,x,y);
+    else draw_circle(x,y,20,false);
+}
 </string>
           </argument>
         </arguments>
