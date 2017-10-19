@@ -207,6 +207,7 @@ repeat (ceil(abs(dx))) {
     if inst != noone {
         vel_x = -vel_x*inst.bounce;
         vel_y -= vel_y * inst.fric;
+        //if (abs(vel_x) &lt; 1.0) vel_x = 0;
         break;
     }
     x += ix;
@@ -221,6 +222,7 @@ repeat (ceil(abs(dy))) {
     if inst != noone {
         vel_x -= vel_x * inst.fric;
         vel_y = -vel_y*inst.bounce;
+        if (abs(vel_y) &lt; 1.0) vel_y = 0;
         break;
     }
     y += iy;
