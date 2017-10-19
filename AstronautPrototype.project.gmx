@@ -9,15 +9,25 @@
     <sprite>sprites\spr_player</sprite>
     <sprite>sprites\spr_link</sprite>
     <sprite>sprites\spr_block</sprite>
+    <sprite>sprites\spr_blockrough</sprite>
+    <sprite>sprites\spr_blockbounce</sprite>
+    <sprite>sprites\spr_ramp45</sprite>
+    <sprite>sprites\spr_ramp45_mask</sprite>
+    <sprite>sprites\spr_1way</sprite>
+    <sprite>sprites\spr_1way_temp</sprite>
     <sprite>sprites\spr_space</sprite>
+    <sprite>sprites\spr_curvedblock</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
+    <script>scripts\calculate_velocity.gml</script>
     <script>scripts\get_left.gml</script>
     <script>scripts\get_right.gml</script>
+    <script>scripts\get_jump.gml</script>
+    <script>scripts\get_jumpreleased.gml</script>
     <script>scripts\get_bezier.gml</script>
     <script>scripts\check_anchor_slack.gml</script>
     <script>scripts\friction_modifier_x.gml</script>
@@ -31,21 +41,49 @@
     <script>scripts\script12.gml</script>
     <script>scripts\draw_forces.gml</script>
     <script>scripts\script14.gml</script>
+    <script>scripts\approach_wall_x.gml</script>
+    <script>scripts\approach_wall_y.gml</script>
+    <script>scripts\apply_approach_wall.gml</script>
+    <script>scripts\get_projected.gml</script>
+    <script>scripts\chain_tension.gml</script>
+    <script>scripts\calculate_forces.gml</script>
+    <script>scripts\vector_sum.gml</script>
+    <script>scripts\mult_vector.gml</script>
+    <script>scripts\bool_1way_point.gml</script>
+    <script>scripts\bool_1way.gml</script>
   </scripts>
   <shaders name="shaders">
     <shader type="GLSLES">shaders\shd_test.shader</shader>
+    <shader type="GLSLES">shaders\shd_curve.shader</shader>
   </shaders>
   <objects name="objects">
+    <objects name="wall_object">
+      <object>objects\obj_block</object>
+      <object>objects\obj_solidblock</object>
+      <object>objects\obj_blockbounce</object>
+      <object>objects\obj_blockrough</object>
+      <object>objects\obj_curvedblock</object>
+      <object>objects\obj_1way</object>
+      <object>objects\obj_moving</object>
+      <object>objects\obj_ramp45</object>
+    </objects>
+    <object>objects\obj_chain</object>
     <object>objects\obj_starter</object>
-    <object>objects\player</object>
+    <objects name="physics_object">
+      <object>objects\obj_physics</object>
+      <object>objects\obj_chainable</object>
+      <object>objects\player</object>
+      <objects name="pickup_object">
+        <object>objects\obj_pickup</object>
+        <object>objects\obj_weight</object>
+      </objects>
+    </objects>
     <object>objects\obj_link</object>
     <object>objects\obj_rope</object>
-    <object>objects\obj_chain</object>
-    <object>objects\obj_weight</object>
-    <object>objects\obj_block</object>
   </objects>
   <rooms name="rooms">
-    <room>rooms\room0</room>
+    <room>rooms\room_physicstest</room>
+    <room>rooms\room_scrolltest</room>
   </rooms>
   <help>
     <rtf>help.rtf</rtf>
