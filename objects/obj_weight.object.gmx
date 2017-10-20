@@ -198,9 +198,71 @@ else{
 }*/
 var xk = x;
 var yk = y;
-var ramp_corr = approach_wall_y(self,0,0,-ramp_height,collisionblock);
-y += ramp_corr;
-repeat (ceil(abs(dx))) {
+//var ramp_corr = approach_wall_y(self,0,0,-ramp_height,collisionblock);
+//y += ramp_corr;
+var x_focus = true; //if the focus is on x-steps or y-steps
+var m = 0;
+var c = 0;
+if abs(dx) &gt;= abs(dy){ //if angle &lt;= 45 deg
+    m = dy/dx; // slope
+    c = y - m*x; // y-intercept
+}
+else{ //if angle &gt; 45 deg
+    x_focus = false; 
+    m = dx/dy; // 1/slope
+    c = x - m*y; // x-intercept
+}
+while !(dx == 0 &amp;&amp; dy == 0) {
+    //calc step
+    var ix = sign(dx)*min(abs(dx),1);
+    var iy = sign(dy)*min(abs(dy),1);
+    var ix_err = 0;
+    var iy_err = 0;
+    // calculate where it should be minus where it is
+    if x_focus{
+        ix_err = abs((m*(x+ix)+c) - y); 
+        iy_err = abs((m*x+c) - (y+iy)); 
+    }else{ 
+        ix_err = abs((m*y+c) - (x+ix));
+        iy_err = abs((m*(y+iy)+c) - x); 
+    }
+    if ix_err == iy_err{
+        if abs(ix) &gt; abs(iy){
+            //do nothing to ix
+            iy = 0;
+        } else{
+            ix = 0;
+            //do nothing to iy
+        }
+    }
+    else if ix_err &lt; iy_err { //if ix is closer to line, move to x + ix
+        //do nothing to ix
+        iy = 0;
+    } else{
+        ix = 0;
+        //do nothing to iy
+    }
+    var inst = instance_place(x+ix, y+iy, collisionblock);
+    if inst != noone { //if collision
+        if (ix != 0){
+            vel_x = -vel_x*inst.bounce;
+            vel_y -= vel_y * inst.fric;
+        }
+        if (iy != 0){
+            vel_x -= vel_x * inst.fric;
+            vel_y = -vel_y*inst.bounce;
+            if (abs(vel_y) &lt; 1.0) vel_y = 0;
+        }
+        break;
+    }
+    x += ix;
+    dx -= ix;
+    y += iy;
+    dy -= iy;
+}
+/*
+//repeat (ceil(abs(dx))) {
+while (dx != 0){
     var ix = sign(dx)*min(abs(dx),1);
     //if (place_meeting(x+ix, y, collisionblock)){
     var inst = instance_place(x+ix, y, collisionblock);
@@ -211,11 +273,12 @@ repeat (ceil(abs(dx))) {
         break;
     }
     x += ix;
-    dx--;
+    dx -= ix;
 }
-var ramp_corr = approach_wall_y(self,0,0,-ramp_corr,collisionblock);
-y += ramp_corr;
-repeat (ceil(abs(dy))) {
+//var ramp_corr = approach_wall_y(self,0,0,-ramp_corr,collisionblock);
+//y += ramp_corr;
+//repeat (ceil(abs(dy))) {
+while (dy != 0){
     var iy = sign(dy)*min(abs(dy),1);
     //if (place_meeting(x, y+iy, collisionblock)){
     var inst = instance_place(x, y+iy, collisionblock);
@@ -226,9 +289,9 @@ repeat (ceil(abs(dy))) {
         break;
     }
     y += iy;
-    dy--;
+    dy -= iy;
 }
-
+*/
 /*repeat (steps){
     if (place_meeting(x+round(ix), y+round(iy), collisionblock)){
         vel_x = 0;
