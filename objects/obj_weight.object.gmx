@@ -266,13 +266,13 @@ while !(dx == 0 &amp;&amp; dy == 0) {
     if inst != noone { //if collision
       if !instance_exists(lastcollision) || (inst.angle != lastcollision.angle){
         if inst.angle == 0.0{
-            if (ix != 0){
+            if (primary_ix != 0){
                 vel_x = -vel_x*inst.bounce;
                 vel_y -= vel_y * inst.fric;
                 dx = -dx*inst.bounce;
                 dy -= dy * inst.fric;
             }
-            if (iy != 0){
+            if (primary_iy != 0){
                 vel_x -= vel_x * inst.fric;
                 vel_y = -vel_y*inst.bounce;
                 dx -= dx * inst.fric;

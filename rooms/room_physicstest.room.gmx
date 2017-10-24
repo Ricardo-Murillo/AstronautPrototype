@@ -250,6 +250,7 @@
     <instance objName="obj_ramp45" x="544" y="160" name="inst_705FB248" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_ramp45" x="576" y="192" name="inst_43CA76AC" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_ramp45" x="608" y="224" name="inst_CA9D5324" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_weight" x="192" y="192" name="inst_7B5B48D5" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
