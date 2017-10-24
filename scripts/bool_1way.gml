@@ -12,6 +12,7 @@ switch (oneway.object_index){
         var other_y = round(other.y + (other.sprite_height/2)-1);
         return (other_y > oneway.y);
     case obj_ramp45:
+        //return false;
         //oneway.y = m1*oneway.x + c1
         //other_.y = m2*other_.x + c2
         var m1 = sprite_get_height(oneway.mask_index)/sprite_get_width(oneway.mask_index);

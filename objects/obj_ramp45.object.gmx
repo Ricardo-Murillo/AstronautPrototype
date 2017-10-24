@@ -31,7 +31,7 @@ collisionmask = spr_ramp45;
 fric = 0.0;
 bounce = 0.0;
 //slope = sprite_get_height(collisionmask)/sprite_get_width(collisionmask);
-angle = point_direction(0,0,sprite_get_width(collisionmask), sprite_get_height(collisionmask));
+angle = point_direction(x,y,x+sprite_get_width(collisionmask), y+sprite_get_height(collisionmask));
 
 </string>
           </argument>

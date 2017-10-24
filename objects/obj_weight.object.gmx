@@ -212,48 +212,129 @@ else{ //if angle &gt; 45 deg
     m = dx/dy; // 1/slope
     c = x - m*y; // x-intercept
 }
+var lastcollision = noone;
 while !(dx == 0 &amp;&amp; dy == 0) {
     //calc step
+    //iter for x and y, think of them as steps
     var ix = sign(dx)*min(abs(dx),1);
     var iy = sign(dy)*min(abs(dy),1);
-    var ix_err = 0;
-    var iy_err = 0;
-    // calculate where it should be minus where it is
-    if x_focus{
-        ix_err = abs((m*(x+ix)+c) - y); 
-        iy_err = abs((m*x+c) - (y+iy)); 
-    }else{ 
-        ix_err = abs((m*y+c) - (x+ix));
-        iy_err = abs((m*(y+iy)+c) - x); 
-    }
-    if ix_err == iy_err{
-        if abs(ix) &gt; abs(iy){
+    var primary_ix = 0; 
+    var primary_iy = 0;
+    var secondary_ix = 0; 
+    var secondary_iy = 0; 
+    if (ix == 0 || iy == 0){
+        primary_ix = ix;
+        primary_iy = iy;
+    }else{
+        var ix_err = 0;
+        var iy_err = 0;
+        // calculate where it should be minus where it is
+        if x_focus{
+            ix_err = abs((m*(x+ix)+c) - y); 
+            iy_err = abs((m*x+c) - (y+iy)); 
+        }else{ 
+            ix_err = abs((m*y+c) - (x+ix));
+            iy_err = abs((m*(y+iy)+c) - x); 
+        }
+        if ix_err == iy_err{
+            if abs(ix) &gt; abs(iy){
+                primary_ix = ix;
+                secondary_iy = iy;
+                //do nothing to ix
+                //iy = 0;
+            } else{
+                primary_iy = iy;
+                secondary_ix = ix;
+                //ix = 0;
+                //do nothing to iy
+            }
+        }
+        else if ix_err &lt; iy_err { //if ix is closer to line, move to x + ix
+            primary_ix = ix;
+            secondary_iy = iy;
             //do nothing to ix
-            iy = 0;
+            //iy = 0;
         } else{
-            ix = 0;
+            primary_iy = iy;
+            secondary_ix = ix;
+            //ix = 0;
             //do nothing to iy
         }
     }
-    else if ix_err &lt; iy_err { //if ix is closer to line, move to x + ix
-        //do nothing to ix
-        iy = 0;
-    } else{
-        ix = 0;
-        //do nothing to iy
-    }
-    var inst = instance_place(x+ix, y+iy, collisionblock);
+    //primary collision check
+    var inst = instance_place(x+primary_ix, y+primary_iy, collisionblock);
     if inst != noone { //if collision
-        if (ix != 0){
-            vel_x = -vel_x*inst.bounce;
-            vel_y -= vel_y * inst.fric;
+      if !instance_exists(lastcollision) || (inst.angle != lastcollision.angle){
+        if inst.angle == 0.0{
+            if (ix != 0){
+                vel_x = -vel_x*inst.bounce;
+                vel_y -= vel_y * inst.fric;
+                dx = -dx*inst.bounce;
+                dy -= dy * inst.fric;
+            }
+            if (iy != 0){
+                vel_x -= vel_x * inst.fric;
+                vel_y = -vel_y*inst.bounce;
+                dx -= dx * inst.fric;
+                dy = -dy*inst.bounce;
+                if (abs(vel_y) &lt; 1.0) vel_y = 0;
+                //if (abs(dy) &lt; 1.0) dy = 0;    
+            }
+            break;
         }
-        if (iy != 0){
-            vel_x -= vel_x * inst.fric;
-            vel_y = -vel_y*inst.bounce;
-            if (abs(vel_y) &lt; 1.0) vel_y = 0;
+        else{
+            angle = -inst.angle*(pi/180);
+            //show_debug_message(string(inst.angle) + " = " +string(angle));
+            vel_pl = vel_x*cos(angle) + vel_y*sin(angle);
+            vel_pp = -vel_x*sin(angle) + vel_y*cos(angle);
+            vel_pl -= vel_pl * inst.fric;
+            vel_pp = -vel_pp * inst.bounce;
+            //if (abs(vel_pp) &lt; 1.0) vel_pp = 0;
+            vel_x = vel_pl*cos(angle) - vel_pp*sin(angle);
+            vel_y = vel_pl*sin(angle) + vel_pp*cos(angle);
+            
+            dpl = dx*cos(angle) + dy*sin(angle);
+            dpp = -dx*sin(angle) + dy*cos(angle);
+            dpl -= dpl * inst.fric;
+            dpp = -dpp * inst.bounce;
+            show_debug_message("(dpl,dpp):"+string(dpl) + ", " +string(dpp));
+            dx = dpl*cos(angle) - dpp*sin(angle);
+            dy = dpl*sin(angle) + dpp*cos(angle);
+            show_debug_message("(dx,dy):"+string(dx) + ", " +string(dy));
+            
         }
+        //break;
+        if abs(dx) &gt;= abs(dy){ //if angle &lt;= 45 deg
+            x_focus = true; 
+            m = dy/dx; // slope
+            c = y - m*x; // y-intercept
+        }else{ //if angle &gt; 45 deg
+            x_focus = false; 
+            m = dx/dy; // 1/slope
+            c = x - m*y; // x-intercept
+        }
+        //ix = 0;
+        //iy = -1;
+        lastcollision = inst;
+        continue;
+      }
+      //if the only remaining step(s) are towards a wall
+      if(secondary_ix == 0 &amp;&amp; secondary_iy == 0){
         break;
+      }else{
+        //secondary collision check
+        inst = instance_place(x+secondary_ix, y+secondary_iy, collisionblock);
+        if inst != noone { //if collision
+            break;
+        }else{
+            ix = secondary_ix;
+            iy = secondary_iy;
+        }
+      }
+      
+    }else{
+        ix = primary_ix;
+        iy = primary_iy;
     }
     x += ix;
     dx -= ix;
